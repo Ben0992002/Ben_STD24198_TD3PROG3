@@ -1,17 +1,43 @@
 package org.example;
+import org.example.repository.DataRetriever;
+import org.example.model.*;
+import java.util.List;
 
-//TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
 public class Main {
-    public static void main(String[] args) {
-        //TIP Press <shortcut actionId="ShowIntentionActions"/> with your caret at the highlighted text
-        // to see how IntelliJ IDEA suggests fixing it.
-        System.out.printf("Hello and welcome!");
+    private static DataRetriever retriever = new DataRetriever();
 
-        for (int i = 1; i <= 5; i++) {
-            //TIP Press <shortcut actionId="Debug"/> to start debugging your code. We have set one <icon src="AllIcons.Debugger.Db_set_breakpoint"/> breakpoint
-            // for you, but you can always add more by pressing <shortcut actionId="ToggleLineBreakpoint"/>.
-            System.out.println("i = " + i);
+    public static void main(String[] args) {
+        // Test pour la Salade Fraîche (ID 1)
+        try {
+            double cost = getDishCost(1);
+            System.out.println("Coût de la Salade : " + cost);
+
+            double margin = getGrossMargin(1, 2000.0);
+            System.out.println("Marge de la Salade : " + margin);
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
         }
+    }
+
+    // MÉTHODE TD3 : On calcule tout dans une boucle Java
+    public static Double getDishCost(int dishId) {
+        double total = 0.0;
+        List<DishIngredient> components = retriever.findIngredientsByDishId(dishId);
+
+        for (DishIngredient di : components) {
+            Ingredient ing = retriever.findIngredientById(di.getIdIngredient());
+            if (ing != null) {
+                // Astuce : Quantité * Prix Unitaire
+                total += (di.getQuantityRequired() * ing.getUnitPrice());
+            }
+        }
+        return total;
+    }
+
+    public static Double getGrossMargin(int dishId, Double sellingPrice) {
+        if (sellingPrice == null) {
+            throw new RuntimeException("EXCEPTION : Le prix de vente est absent pour le plat " + dishId);
+        }
+        return sellingPrice - getDishCost(dishId);
     }
 }
